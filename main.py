@@ -95,11 +95,11 @@ async def send_status(websocket):
     startTime = None
     while True:
         distance = Ultra_A.get_distance()
-        print(f"measured distance {distance}")
+        # print(f"measured distance {distance}")
         push_to_data_array(distance, value_array, 3)
-        print(f"value array: {value_array}")
+        #print(f"value array: {value_array}")
         us_output = median_input(value_array)
-        print(f"output de la mediane: {us_output}")
+        # print(f"output de la mediane: {us_output}")
         lt_status_now = lf.read_digital()  # Read current sensor status
         
         array_message = []
@@ -111,6 +111,7 @@ async def send_status(websocket):
         elapsed_time = 0
         if startTime != None:
             elapsed_time = time.time() - startTime
+            print(f"elapsed_time right noew is {elapsed_time}")
 
         if us_output > 0:
             if us_output < 34 and distance_state == 1:
@@ -123,15 +124,15 @@ async def send_status(websocket):
                 distance_state = 4
                 startTime = time.time()
                 print("first timer starteds in state 4")
-            elif elapsed_time > 3.5 and distance_state == 4:
+            elif elapsed_time > 1 and distance_state == 4:
                 distance_state = 5
                 startTime = time.time()
                 print("second timer started in state 5")
-            elif elapsed_time > 3.5 and distance_state == 5:
+            elif elapsed_time > 1 and distance_state == 5:
                 distance_state = 6
                 startTime = time.time()
                 print("in state 6")
-            elif elapsed_time >  1.7 and distance_state == 6:
+            elif elapsed_time >  1 and distance_state == 6:
                 distance_state = 7
                 print("in state 7")
             elif sum(lt_status_now) >= 1 and distance_state == 7:
@@ -149,7 +150,6 @@ async def echo(websocket, path):
     asyncio.create_task(send_status(websocket))
     async for message in websocket:
         speed, rotation = process_message(message)
-        print(f"speed sent by godot is {speed}")
         if (speed < 0):
             speed = speed/-1
             bw.speed = speed
@@ -158,7 +158,7 @@ async def echo(websocket, path):
             bw.speed = speed
             bw.forward()
         fw.turn(rotation)
-        print(speed, rotation)
+        print(f"speed is {speed}, rotation is {rotation}")
         
 def destroy():
 	bw.stop()
