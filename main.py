@@ -17,8 +17,6 @@ bw = back_wheels.Back_Wheels(db='config')
 threshold = 10
 value_array = [-1,-1,-1]
 
-speed = 0
-
 fw.ready()
 bw.ready()
 fw.turning_max = 45
@@ -91,7 +89,7 @@ def process_message(json_message):
         print(f"Erreur lors du traitement du message JSON : {e}")
         return None
 
-async def send_status(websocket, speed):
+async def send_status(websocket):
     """Send line follower status to Godot."""
     distance_state = 1
     startTime = None
@@ -148,7 +146,7 @@ async def send_status(websocket, speed):
 
 async def echo(websocket, path):
     """Handle incoming messages and launch send_status task."""
-    asyncio.create_task(send_status(websocket, speed))
+    asyncio.create_task(send_status(websocket))
     async for message in websocket:
         speed, rotation = process_message(message)
         if (speed < 0):
@@ -171,7 +169,7 @@ async def main():
             picar.setup()
             await calibrate()  # Calibrate before starting the server
             async with serve(echo, "localhost", 8765):
-                time.sleep(15)
+                time.sleep(7)
                 await asyncio.Future()  # Run server forever
         except Exception as e:
             print(e)
