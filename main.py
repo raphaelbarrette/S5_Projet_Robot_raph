@@ -134,7 +134,7 @@ async def send_status(websocket):
             elif elapsed_time >  1.7 and distance_state == 6:
                 distance_state = 7
                 print("in state 7")
-            elif sum(lt_status_now) >= 1:
+            elif sum(lt_status_now) >= 1 and distance_state == 7:
                 distance_state = 1
                 print("back to state 1")
 
