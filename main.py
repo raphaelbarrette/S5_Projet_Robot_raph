@@ -113,10 +113,10 @@ async def send_status(websocket):
             elapsed_time = time.time() - startTime
 
         if us_output > 0:
-            if us_output < 30 and distance_state == 1:
+            if us_output < 34 and distance_state == 1:
                 distance_state = 2
                 print("in state 2")
-            elif us_output < 12 and distance_state == 2:
+            elif us_output < 14 and distance_state == 2:
                 distance_state = 3
                 print("in state 3")
             elif us_output > 28 and distance_state == 3:
