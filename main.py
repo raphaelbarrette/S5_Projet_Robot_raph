@@ -123,14 +123,17 @@ async def send_status(websocket):
             elif us_output > 28 and distance_state == 3:
                 distance_state = 4
                 startTime = time.time()
+                elapsed_time = 0
                 print("first timer starteds in state 4")
             elif elapsed_time > 1 and distance_state == 4:
                 distance_state = 5
                 startTime = time.time()
+                elapsed_time = 0
                 print("second timer started in state 5")
             elif elapsed_time > 1 and distance_state == 5:
                 distance_state = 6
                 startTime = time.time()
+                elapsed_time = 0
                 print("in state 6")
             elif elapsed_time >  1 and distance_state == 6:
                 distance_state = 7
