@@ -17,6 +17,8 @@ bw = back_wheels.Back_Wheels(db='config')
 threshold = 10
 value_array = [-1,-1,-1]
 
+speed = 0
+
 fw.ready()
 bw.ready()
 fw.turning_max = 45
@@ -89,8 +91,10 @@ def process_message(json_message):
         print(f"Erreur lors du traitement du message JSON : {e}")
         return None
 
-async def send_status(websocket):
+async def send_status(websocket, speed):
     """Send line follower status to Godot."""
+    distance_state = 1
+    startTime = None
     while True:
         distance = Ultra_A.get_distance()
         print(f"measured distance {distance}")
@@ -106,9 +110,37 @@ async def send_status(websocket):
         array_message.append(lt_status_now[2])
         array_message.append(lt_status_now[3])
         array_message.append(lt_status_now[4])
-        array_message.append(us_output)
-        # Temps après l'envoi
-        
+        elapsed_time = 0
+        if startTime != None:
+            elapsed_time = time.time() - startTime
+
+        if us_output > 0:
+            if us_output < 30 and distance_state == 1:
+                distance_state = 2
+                print("in state 2")
+            elif us_output < 12 and distance_state == 2:
+                distance_state = 3
+                print("in state 3")
+            elif us_output > 28 and distance_state == 3:
+                distance_state = 4
+                startTime = time.time()
+                print("first timer starteds in state 4")
+            elif elapsed_time > 3.5 and distance_state == 4:
+                distance_state = 5
+                startTime = time.time()
+                print("second timer started in state 5")
+            elif elapsed_time > 3.5 and distance_state == 5:
+                distance_state = 6
+                startTime = time.time()
+                print("in state 6")
+            elif elapsed_time >  1.7 and distance_state == 6:
+                distance_state = 7
+                print("in state 7")
+            elif sum(lt_status_now) >= 1:
+                distance_state = 1
+                print("back to state 1")
+
+        array_message.append(distance_state)
         await websocket.send(json.dumps(array_message))
         print(array_message)
 
@@ -116,7 +148,7 @@ async def send_status(websocket):
 
 async def echo(websocket, path):
     """Handle incoming messages and launch send_status task."""
-    asyncio.create_task(send_status(websocket))
+    asyncio.create_task(send_status(websocket, speed))
     async for message in websocket:
         speed, rotation = process_message(message)
         if (speed < 0):
