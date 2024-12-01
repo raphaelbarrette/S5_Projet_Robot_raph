@@ -98,7 +98,10 @@ async def send_status(websocket):
         # print(f"measured distance {distance}")
         push_to_data_array(distance, value_array, 3)
         #print(f"value array: {value_array}")
-        us_output = median_input(value_array)
+        if distance_state <= 3:
+            us_output = median_input(value_array)
+        else: 
+            us_output = -1
         # print(f"output de la mediane: {us_output}")
         lt_status_now = lf.read_digital()  # Read current sensor status
         
@@ -125,22 +128,22 @@ async def send_status(websocket):
                 startTime = time.time()
                 elapsed_time = 0
                 print("first timer starteds in state 4")
-            elif elapsed_time > 1 and distance_state == 4:
-                distance_state = 5
-                startTime = time.time()
-                elapsed_time = 0
-                print("second timer started in state 5")
-            elif elapsed_time > 1 and distance_state == 5:
-                distance_state = 6
-                startTime = time.time()
-                elapsed_time = 0
-                print("in state 6")
-            elif elapsed_time >  1 and distance_state == 6:
-                distance_state = 7
-                print("in state 7")
-            elif sum(lt_status_now) >= 1 and distance_state == 7:
-                distance_state = 1
-                print("back to state 1")
+        if elapsed_time > 2 and distance_state == 4:
+            distance_state = 5
+            startTime = time.time()
+            elapsed_time = 0
+            print("second timer started in state 5")
+        elif elapsed_time > 2 and distance_state == 5:
+            distance_state = 6
+            startTime = time.time()
+            elapsed_time = 0
+            print("in state 6")
+        elif elapsed_time >  2 and distance_state == 6:
+            distance_state = 7
+            print("in state 7")
+        elif sum(lt_status_now) >= 1 and distance_state == 7:
+            distance_state = 1
+            print("back to state 1")
 
         array_message.append(distance_state)
         await websocket.send(json.dumps(array_message))
